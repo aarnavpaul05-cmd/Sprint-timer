@@ -1,0 +1,14 @@
+/* Sprint Start Reactor — tap area fix */
+*{box-sizing:border-box}
+.tap-area{
+  position:absolute; inset:0; cursor:crosshair; border-radius:16px;
+  outline:2px dashed transparent;
+  /* IMPORTANT: don't block Start button until a trial starts */
+  pointer-events:none;
+  z-index:0;
+}
+.tap-area.active{
+  outline-color:#31405e;
+  pointer-events:auto;
+  z-index:1;
+}
