@@ -1,8 +1,8 @@
 diff --git a/app.js b/app.js
-index 7a2d223b209829b60e4af807a5f219a6d41deabc..2ae5458e0c283aeb3db314af7fea4f83d17c3502 100644
+index 7a2d223b209829b60e4af807a5f219a6d41deabc..5cc38c8710163f8aa9cb909916b8cfa3c484c89f 100644
 --- a/app.js
 +++ b/app.js
-@@ -1,61 +1,62 @@
+@@ -1,61 +1,65 @@
  // Sprint Start Reactor — final clean build with audio unlock + test beep
  const $ = (sel) => document.querySelector(sel);
  
@@ -14,7 +14,8 @@ index 7a2d223b209829b60e4af807a5f219a6d41deabc..2ae5458e0c283aeb3db314af7fea4f83
  };
  
  // Elements
- const cue = $("#cue"), startBtn = $("#startBtn"), testBeepBtn = $("#testBeepBtn"), tapArea = $("#tapArea"), status = $("#status");
+-const cue = $("#cue"), startBtn = $("#startBtn"), testBeepBtn = $("#testBeepBtn"), tapArea = $("#tapArea"), status = $("#status");
++const cue = $("#cue"), startBtn = $("#startBtn"), testBeepBtn = $("#testBeepBtn"), tapArea = $("#tapArea"), status = $("#status"), modeHint = $("#modeHint");
  const lightMark = $("#light-mark"), lightSet = $("#light-set"), lightGun = $("#light-gun");
  const trialCount = $("#trialCount"), lastMsEl = $("#lastMs"), bestMsEl = $("#bestMs"), avgMsEl = $("#avgMs"), falseCountEl = $("#falseCount"), logEl = $("#log");
  const trialsInput = $("#trials"), delayPreMin = $("#delayPreMin"), delayPreMax = $("#delayPreMax"), delayMSMin = $("#delayMSMin"), delayMSMax = $("#delayMSMax"), delaySGMin = $("#delaySGMin"), delaySGMax = $("#delaySGMax"), modeSel = $("#mode"), vibrateCb = $("#vibrate"), autoNextCb = $("#autoNext");
@@ -55,9 +56,10 @@ index 7a2d223b209829b60e4af807a5f219a6d41deabc..2ae5458e0c283aeb3db314af7fea4f83
  function autoMaybeNext(){ if(state.autoNext&&state.trial<state.trialsTarget) setTimeout(()=>{startBtn.click();},1000); else if(state.trial>=state.trialsTarget) setStatus('Set complete. Adjust settings or start again.'); }
  function cleanupAfterTrial(){ state.running=false; state.awaitingGun=false; state.gunAt=0; startBtn.disabled=false; tapArea.classList.remove('active'); state.abortController?.abort(); state.abortController=null; resetLights(); }
  function clampRnd(min,max){ let lo=Math.min(min,max), hi=Math.max(min,max); if(hi===lo) hi=lo+0.001; return rnd(lo,hi); }
++function applyModeSettings(){ state.mode=modeSel.value; state.practice=state.mode==='practice'; document.body.classList.toggle('practice-mode',state.practice); if(modeHint) modeHint.textContent=state.practice?'Hands-free Practice ends a trial automatically right after Gun.':''; }
  
 -startBtn.addEventListener('click', ()=>{ unlockAVOnce(); state.trialsTarget=Math.max(1,Math.min(50,trialsInput.valueAsNumber||10)); state.autoNext=!!autoNextCb.checked; state.mode=modeSel.value; state.vibrate=!!vibrateCb.checked; if(state.trial>=state.trialsTarget) state.trial=0; setStatus(''); runTrial(); });
-+startBtn.addEventListener('click', ()=>{ unlockAVOnce(); state.trialsTarget=Math.max(1,Math.min(50,trialsInput.valueAsNumber||10)); state.autoNext=!!autoNextCb.checked; state.mode=modeSel.value; state.practice=state.mode==='practice'; state.vibrate=!!vibrateCb.checked; if(state.trial>=state.trialsTarget) state.trial=0; setStatus(''); runTrial(); });
++startBtn.addEventListener('click', ()=>{ unlockAVOnce(); state.trialsTarget=Math.max(1,Math.min(50,trialsInput.valueAsNumber||10)); state.autoNext=!!autoNextCb.checked; state.vibrate=!!vibrateCb.checked; applyModeSettings(); if(state.trial>=state.trialsTarget) state.trial=0; setStatus(''); runTrial(); });
  testBeepBtn.addEventListener('click', ()=>{ unlockAVOnce(); state.mode==='voice'?speak('Test'):beep(1200,200); });
  document.addEventListener('pointerdown', unlockAVOnce, { once:true });
 -tapArea.addEventListener('pointerdown', ()=>{ if(!state.running) return; if(state.awaitingGun && state.gunAt===0) falseStart(); else if(state.awaitingGun && state.gunAt>0) finishValidReaction(); });
@@ -65,8 +67,10 @@ index 7a2d223b209829b60e4af807a5f219a6d41deabc..2ae5458e0c283aeb3db314af7fea4f83
  document.addEventListener('keydown', (e)=>{ if(e.code==='Space'){ e.preventDefault(); tapArea.dispatchEvent(new PointerEvent('pointerdown')); } });
  fullscreenBtn?.addEventListener('click', async()=>{ const el=document.documentElement; try{ if(!document.fullscreenElement) await el.requestFullscreen(); else await document.exitFullscreen(); }catch{} });
  resetStatsBtn?.addEventListener('click', ()=>{ zeroStats(); setStatus('Stats reset.'); });
++modeSel.addEventListener('change', ()=>{ applyModeSettings(); if(!state.running) setStatus(''); });
  tapArea.addEventListener('touchmove', e=>{ if(state.running) e.preventDefault(); }, {passive:false});
  
  if('serviceWorker'in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }); }
++applyModeSettings();
  zeroStats(); setCue('Tap Start'); setStatus('');
  if('speechSynthesis'in window){ speechSynthesis.onvoiceschanged=()=>{}; }
