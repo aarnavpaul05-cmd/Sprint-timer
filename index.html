@@ -1,8 +1,40 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/index.html b/index.html
-index 8876f47fa9932a960eee4d0f04c5a068660395f7..1de15d6384010f93744842c10363847532055156 100644
+index 8876f47fa9932a960eee4d0f04c5a068660395f7..16f457ca5b15531f0ac0efb2c84cdc92597e6cb4 100644
 --- a/index.html
 +++ b/index.html
-@@ -38,50 +38,51 @@
+@@ -8,80 +8,82 @@
+   <meta name="theme-color" content="#141419" />
+   <link rel="stylesheet" href="style.css" />
+ </head>
+ <body>
+   <header>
+     <h1>Sprint Start Reactor</h1>
+   </header>
+ 
+   <main>
+     <div class="banner">Tip: After updating files, hard refresh if you don't hear audio (Safari caches aggressively).</div>
+     <section id="stage" class="card">
+       <div class="lights">
+         <div class="light" id="light-mark" aria-label="On Your Marks"></div>
+         <div class="light" id="light-set" aria-label="Set"></div>
+         <div class="light" id="light-gun" aria-label="Gun"></div>
+       </div>
+ 
+       <div id="cue" class="cue">Tap Start</div>
+       <div class="actions">
+         <button id="startBtn" class="primary">Start</button>
+         <button id="testBeepBtn" class="secondary">Test Beep</button>
+       </div>
+       <div class="tap-area" id="tapArea" aria-label="Tap anywhere after Gun!"></div>
+ 
+       <div id="status" class="status"></div>
++      <p id="modeHint" class="mode-hint" aria-live="polite"></p>
+     </section>
+ 
+     <section class="grid">
+       <div class="card">
+         <h2>Settings</h2>
          <div class="form">
            <label>Trials per set
              <input type="number" id="trials" min="1" max="50" value="10">
@@ -54,3 +86,6 @@ index 8876f47fa9932a960eee4d0f04c5a068660395f7..1de15d6384010f93744842c103638475
            <div><span>Last:</span> <b id="lastMs">—</b> ms</div>
            <div><span>Best:</span> <b id="bestMs">—</b> ms</div>
            <div><span>Average (valid):</span> <b id="avgMs">—</b> ms</div>
+ 
+EOF
+)
